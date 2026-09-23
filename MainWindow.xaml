@@ -4,33 +4,103 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RefactoringWPF"
+        xmlns:vm="clr-namespace:RefactoringWPF.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="900">
-    <Grid>
+        Title="Менеджер заказов" Height="650" Width="1000"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-            <TextBox x:Name="txtCustomer" Width="120" Margin="5" 
-                     Text="Customer"/>
-            <TextBox x:Name="txtProduct" Width="120" Margin="5" 
-                     Text="Product"/>
-            <TextBox x:Name="txtQty" Width="60" Margin="5" Text="1"/>
-            <TextBox x:Name="txtPrice" Width="80" Margin="5" Text="100"/>
-            <Button Content="Добавить" Click="Button_Click" Margin="5"/>
-        </StackPanel>
+        <!-- Панель добавления заказа -->
+        <GroupBox Grid.Row="0" Header="Добавить новый заказ" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <StackPanel.Resources>
+                    <Style TargetType="TextBox">
+                        <Setter Property="Width" Value="120"/>
+                        <Setter Property="Margin" Value="5"/>
+                        <Setter Property="Padding" Value="5"/>
+                    </Style>
+                </StackPanel.Resources>
 
-        <DataGrid x:Name="dgOrders" Grid.Row="1" Margin="10" 
-                  AutoGenerateColumns="True"/>
+                <TextBox x:Name="txtCustomer" 
+                         Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Email клиента"/>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10">
-            <TextBlock x:Name="lblTotal" Margin="5" FontWeight="Bold"/>
-            <Button Content="Обновить" Click="Button_Click_1" Margin="5"/>
-            <Button Content="Удалить" Click="Button_Click_2" Margin="5"/>
-            <Button Content="Скидка" Click="Button_Click_3" Margin="5"/>
+                <TextBox x:Name="txtProduct" 
+                         Text="{Binding ProductName, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Название товара"/>
+
+                <TextBox Text="{Binding QuantityText, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Количество"/>
+
+                <TextBox Text="{Binding PriceText, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Цена"/>
+
+                <Button Content=" Добавить" 
+                        Command="{Binding AddOrderCommand}"
+                        Margin="5" Padding="10,5"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Таблица заказов -->
+        <DataGrid Grid.Row="1" 
+                  ItemsSource="{Binding Orders}"
+                  SelectedItem="{Binding SelectedOrder}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  AlternatingRowBackground="#F0F0F0"
+                  Margin="0,0,0,10">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                <DataGridTextColumn Header="Клиент (Email)" Binding="{Binding CustomerName}" Width="150"/>
+                <DataGridTextColumn Header="Товар" Binding="{Binding ProductName}" Width="150"/>
+                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="80"/>
+                <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:N2} ₽}" Width="100"/>
+                <DataGridTextColumn Header="Сумма" Binding="{Binding Total, StringFormat={}{0:N2} ₽}" Width="100"/>
+                <DataGridTextColumn Header="Статус" Binding="{Binding StatusRussian}" Width="100"/>
+                <DataGridTextColumn Header="Скидка" Binding="{Binding DiscountInfo}" Width="120"/>
+                <DataGridTextColumn Header="Дата создания" Binding="{Binding CreatedDate, StringFormat={}{0:dd.MM.yyyy}}" Width="120"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Панель действий -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <TextBlock Text="{Binding StatusMessage}" 
+                       Foreground="Gray" 
+                       VerticalAlignment="Center" 
+                       Margin="5"/>
+
+            <TextBlock Text="Итого: " 
+                       FontWeight="Bold" 
+                       VerticalAlignment="Center" 
+                       Margin="10,0,0,0"/>
+
+            <TextBlock Text="{Binding TotalRevenue, StringFormat={}{0:N2} ₽}" 
+                       FontWeight="Bold" 
+                       FontSize="14" 
+                       VerticalAlignment="Center"/>
+
+            <Button Content="Обновить" 
+                    Command="{Binding RefreshCommand}"
+                    Margin="10,0,5,0" Padding="10,5"/>
+
+            <Button Content="Удалить" 
+                    Command="{Binding DeleteOrderCommand}"
+                    Margin="5" Padding="10,5"/>
+
+            <Button Content="Скидка" 
+                    Command="{Binding ShowDiscountCommand}"
+                    Margin="5" Padding="10,5"/>
         </StackPanel>
     </Grid>
 </Window>
